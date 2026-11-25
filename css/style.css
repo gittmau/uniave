@@ -431,6 +431,7 @@ p {
   display: grid;
   align-items: center;
   overflow: hidden;
+  touch-action: pan-y;
   color: #fff;
   background: #183e2c;
 }

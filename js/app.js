@@ -7,9 +7,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function initHero() {
   const slides = [...document.querySelectorAll(".hero-slide")];
+  const hero = document.querySelector(".hero");
   const content = document.querySelector(".hero-content");
-  if (slides.length < 2 || !content) return;
+  if (slides.length < 2 || !hero || !content) return;
   let index = 0;
+  let touchStart = null;
+  let suppressClick = false;
   const counter = document.querySelector(".hero-counter");
   const eyebrow = content.querySelector(".eyebrow");
   const title = content.querySelector(".display-title");
@@ -56,6 +59,35 @@ function initHero() {
     showSlide(index + 1);
     restartTimer();
   });
+
+  hero.addEventListener("pointerdown", (event) => {
+    if (event.pointerType !== "touch") return;
+    touchStart = { x: event.clientX, y: event.clientY };
+  });
+
+  window.addEventListener("pointerup", (event) => {
+    if (!touchStart || event.pointerType !== "touch") return;
+    const deltaX = event.clientX - touchStart.x;
+    const deltaY = event.clientY - touchStart.y;
+    touchStart = null;
+
+    if (Math.abs(deltaX) < 50 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
+    showSlide(index + (deltaX < 0 ? 1 : -1));
+    restartTimer();
+    suppressClick = true;
+    window.setTimeout(() => { suppressClick = false; }, 500);
+  });
+
+  window.addEventListener("pointercancel", () => {
+    touchStart = null;
+  });
+
+  hero.addEventListener("click", (event) => {
+    if (!suppressClick) return;
+    event.preventDefault();
+    event.stopPropagation();
+    suppressClick = false;
+  }, true);
 
   updateContent(slides[index]);
   restartTimer();
